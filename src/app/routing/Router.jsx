@@ -1,62 +1,73 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
+import { BASE_URL } from "@/shared/constants";
+
+const getCurrentPath = () => {
+  const pathname = window.location.pathname;
+
+    if(pathname.startsWith(BASE_URL)) {
+        return pathname.replace(BASE_URL, "") || "/";
+    }
+    
+    return pathname;
+};
 
 const matchPath = (path, route) => {
-    const pathParts = path.split('/');
-    const routePaths = route.split('/');
+  const pathParts = path.split("/");
+  const routePaths = route.split("/");
 
-    if(pathParts.length !== routePaths.length) {
-        return null;
+  if (pathParts.length !== routePaths.length) {
+    return null;
+  }
+
+  const params = {};
+
+  for (let i = 0; i < routePaths.length; i++) {
+    if (routePaths[i].startsWith(":")) {
+      const paramName = routePaths[i].slice(1);
+
+      params[paramName] = pathParts[i];
+    } else if (routePaths[i] !== pathParts[i]) {
+      return null;
     }
+  }
 
-    const params = {};
-
-    for(let i = 0; i < routePaths.length; i++) {
-        if(routePaths[i].startsWith(':')) {
-            const paramName = routePaths[i].slice(1);
-
-            params[paramName] = pathParts[i];
-        } else if(routePaths[i] !== pathParts[i]) {
-            return null;
-        }
-    }
-
-    return params;
-}
+  return params;
+};
 
 export const useRoute = () => {
-    const [path, setPath] = useState(window.location.pathname);
+  const [path, setPath] = useState(getCurrentPath());
 
-    useEffect(() => {
-        const onLocationChange = () => {
-            setPath(window.location.pathname)
-        }
+  useEffect(() => {
+    const onLocationChange = () => {
+      setPath(getCurrentPath());
+    };
 
-        window.addEventListener('popstate', onLocationChange);
+    window.addEventListener("popstate", onLocationChange);
 
-        return () => {
-            window.removeEventListener('popstate', onLocationChange);
-        }
-    }, [])
+    return () => {
+      window.removeEventListener("popstate", onLocationChange);
+    };
+  }, []);
 
-    return path
-}
+  return path;
+};
 
 const Router = ({ routes }) => {
-    const path = useRoute();
+  const path = useRoute();
 
-    for(const route in routes) {
-        const params = matchPath(path, route);
+  for (const route in routes) {
+    const params = matchPath(path, route);
 
-        if(params) {
-            const Page = routes[route];
+    if (params) {
+      const Page = routes[route];
 
-            return <Page params={params} />
-        }
+      return <Page params={params} />;
     }
+  }
 
-    const NotFound = routes['*'];
+  const NotFound = routes["*"];
 
-    return <NotFound />
-}
+  return <NotFound />;
+};
 
-export default Router
+export default Router;

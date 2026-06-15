@@ -36,7 +36,7 @@ function TodoItem({ className = "", id, title, isDone }) {
       <label className={`${styles.label} visually-hidden`} htmlFor={id}>
         {title}
       </label>
-      <RouterLink to={`/tasks/${id}`} className={styles.link} aria-label="Страница сведений о задаче">
+      <RouterLink to={`tasks/${id}`} className={styles.link} aria-label="Страница сведений о задаче">
         <span dangerouslySetInnerHTML={{ __html: highlightedTitle }} />
       </RouterLink>
       <button
